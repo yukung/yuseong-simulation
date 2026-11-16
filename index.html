@@ -1,34 +1,188 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>유성여지도 | 정책 시뮬레이터</title><style>
-*{box-sizing:border-box}body{margin:0;font:14px system-ui,sans-serif;background:#f0f4f5;color:#19343e}header{background:#123b48;color:white;padding:18px 24px}h1{margin:0;font-size:23px}header small{color:#b9d9df}main{display:grid;grid-template-columns:330px 1fr;gap:12px;padding:12px;height:calc(100vh - 80px)}aside{overflow:auto;background:white;border-radius:14px;padding:16px}h3{margin:16px 0 8px;font-size:15px}button,select{font:inherit;border:1px solid #cbdadd;border-radius:8px;padding:9px;background:white;color:inherit;cursor:pointer}button.active{background:#126c70;color:white;border-color:#126c70}.phases{display:grid;grid-template-columns:1fr 1fr;gap:6px}.metric{background:#eaf5f2;padding:14px;border-radius:10px;margin:12px 0}.metric strong{font-size:28px;display:block;color:#08796b}.bar{height:8px;background:#dce8e9;border-radius:8px;overflow:hidden}.bar i{display:block;height:100%;background:#168b86}.line{display:flex;justify-content:space-between;margin:7px 0}.map{position:relative;min-height:400px;background:#e7eeeb;border-radius:14px;overflow:hidden}canvas{width:100%;height:100%;display:block;touch-action:none}.tools{position:absolute;top:12px;left:12px;background:white;padding:8px;border-radius:10px;box-shadow:0 2px 10px #0002}.legend{position:absolute;bottom:12px;left:12px;background:#fffffff0;padding:10px;border-radius:8px;line-height:1.8}.note{font-size:12px;color:#52676e;line-height:1.6}.clock{font-size:25px;font-weight:700}input[type=range]{width:100%}#status{color:#a34b15}.boxcard{background:#f4f8fb;border-radius:10px;padding:10px;margin:8px 0}.gt{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:6px}.gt th,.gt td{padding:4px 3px;text-align:right;border-bottom:1px solid #e3eaec}.gt td:first-child{text-align:left}.gt .on{background:#126c70;color:#fff;font-weight:700}.big{font-size:20px;margin:6px 0}.big strong{font-size:28px;color:#08796b}.big em{font-style:normal;color:#08796b;font-weight:700;margin-left:6px} @media(max-width:760px){main{display:flex;flex-direction:column;height:auto}.map{height:65vh;order:-1}aside{overflow:visible}}
-</style><header><h1>유성여지도 · Mobility Simulator</h1><small>MATSim 2025 · 유성구 실제 도로망 · 교통취약계층 7,101명(95칸) + 공백① 주민 3,132명(21칸) + 13개 동 일반 주민 표본</small></header><main><aside><div class="phases" id="phases"></div><div class="metric">선택 대상 평균 왕복 이동시간<strong id="avg">—</strong><span id="saving"></span></div><div class="note" id="scnnote"></div><div id="gapPanel"></div><div class="line"><label>행정동 <select id="dong"><option value="">전체</option></select></label><label>계층 <select id="group"><option value="vul">교통취약계층 전체</option><option value="elderly">고령자</option><option value="disabled">장애인</option><option value="student">학생</option><option value="general">일반 주민</option><option value="">모두</option></select></label></div><h3>시간대별 이동</h3><div class="clock" id="clock">07:00</div><input id="time" type="range" min="360" max="1320" value="420"><div class="line"><button id="play">▶ 재생</button><select id="speed"><option value="1">1배속</option><option value="10" selected>10배속</option><option value="30">30배속</option><option value="60">60배속</option></select></div><div class="line"><span>선택 인원 <b id="count">—</b></span><span>이동 중 <b id="moving">—</b></span></div><h3>가는 길 교통수단</h3><div id="modes"></div><h3>단계 비교 · 선택 대상</h3><div id="compare"></div><h3>MATSim 결과 · 반복 평균</h3><div id="sim"></div><h3>지도 표시</h3><label><input type="checkbox" id="homes" checked> 거주 격자</label> <label><input type="checkbox" id="paths"> 이동 경로</label><br><label><input type="checkbox" id="stations" checked> DRT 거점·신설 정류장</label> <label><input type="checkbox" id="slowroads" checked> 공사 중 느려진 도로</label> <label><input type="checkbox" id="gapzones" checked> 흰 박스 / 지수 변화 칸</label> <label><input type="checkbox" id="buildings"> 건물</label><p class="note">MATSim으로 하루를 여러 번(버스 출발 시각을 바꿔) 돌린 평균: 공사 전·중·집중배차 10회, 정책 3회. 교통취약계층은 대중교통(버스·DRT·특별교통수단)만 이용하고, 걷기는 정류장까지만. 목적지는 KTDB 2024 버스 OD 분포로 정하고 800m 안은 제외. 일반 주민은 KTDB 수단분담(도보·자가용·대중교통). 공사 중 버스 속도는 정류장 구간 실측(2024.10→2026.10, 출근 7~9시), 같은 구간 도로에 자가용 속도도 같은 비율로 적용. 집중배차: 21칸 800m 안 정류장을 지나는 45개 노선을 공사 전 배차로. 공백② 정책: DRT 24대(진잠 18·구즉 6, 15인승, 최대 대기 30분), 특별교통수단 8대(4인승)(저상버스·특별교통수단 연계 22칸 장애인), 정류장 신설 3곳, 212·마을3 배차 20분. DRT를 못 탄 요청은 집중배차 단계의 버스 시간으로 표시.</p><p id="status">데이터 불러오는 중…</p></aside><section class="map"><canvas id="map"></canvas><div class="tools"><button id="plus">＋</button> <button id="minus">－</button> <button id="reset">전체 보기</button></div><div class="legend">🔴 고령자　🔵 학생　🟣 장애인　⚫ 일반 주민<br>🟠 거주 격자　🟢 DRT 거점　🟧 신설 정류장<br><span style="color:#d43d2a">━</span> 공사 중 10% 넘게 느려진 도로　<span style="color:#1f5fbf">┅</span> 흰 박스<br><span style="color:#1a965a">■</span> 정책 후 기준 아래로　<span style="color:#c0261a">■</span> 아직 기준 위　<span style="color:#78c88c">■</span> 95칸 밖 좋아진 칸<br><a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a></div></section></main><script>
-const $=id=>document.getElementById(id), phases=['before','during','focus','policy'], names=['공사 전','공사 중','공사 중 + 집중배차','+ 공백② 정책'], notes={before:'2024.10 버스 속도·배차',during:'2026.10 버스 속도, 같은 버스 대수 → 배차가 벌어짐',focus:'공백①: 45개 노선 공사 전 배차로',policy:'공백②: DRT·특별교통수단·정류장 신설·증편 추가'}, modes={walk:'도보',pt:'버스',bus:'버스',car:'자가용',nopt:'대중교통 경로 없음(걸어감)',drt_south:'DRT (진잠)',drt_north:'DRT (구즉)',drt_acc:'특별교통수단','drt+pt':'DRT → 버스',drt_rejected:'DRT 못 탐 → 버스','drt_south+pt':'DRT → 버스','drt_north+pt':'DRT → 버스'}, colors={elderly:'#dc4545',student:'#2675d9',disabled:'#923dc3',general:'#4b5560'},dongs13=['관평동','구즉동','노은1동','노은2동','노은3동','상대동','신성동','온천1동','온천2동','원신흥동','전민동','진잠동','학하동'];let slow=[],stats=[],meta={},extra=null;let phase='before',people=[],selected=[],routes=[],features=[],locations={},hubs=[],newstops=[],tram=[],t=420,playing=false,zoom=1,cx=127.35,cy=36.39,base=1,drag=null;const canvas=$('map'),ctx=canvas.getContext('2d');let W,H;const bg=document.createElement("canvas");let bgKey="";
-function resize(){W=canvas.clientWidth;H=canvas.clientHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);base=Math.min(W/.19,H/.25);draw()}function xy(p){return [W/2+(p[1]-cx)*base*zoom*.81,H/2-(p[0]-cy)*base*zoom]}function line(points,color,width,fill){if(!points.length)return;ctx.beginPath();points.forEach((p,i)=>{let q=xy(p);i?ctx.lineTo(...q):ctx.moveTo(...q)});if(fill){ctx.fillStyle=fill;ctx.fill()}ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}function dot(p,c,r){if(!p)return;let q=xy(p);ctx.beginPath();ctx.arc(...q,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill()}
-function routeInfo(p){let cum=[0];for(let i=1;i<p.length;i++)cum.push(cum[i-1]+Math.hypot((p[i][1]-p[i-1][1])*.81,p[i][0]-p[i-1][0]));return {p,cum,len:cum.at(-1)||0}}function pos(r,f){if(!r||!r.p.length)return null;let d=r.len*Math.max(0,Math.min(1,f)),a=0,b=r.p.length-1;while(a<b){let m=(a+b)>>1;if(r.cum[m]<d)a=m+1;else b=m}if(!a)return r.p[0];let k=(d-r.cum[a-1])/(r.cum[a]-r.cum[a-1]||1);return r.p[a-1].map((v,j)=>v+(r.p[a][j]-v)*k)}
-function prepare(tr){let legs=tr.legs.map(l=>({...l,r:routes[l.route]})).filter(l=>l.r&&l.r.p.length),wl=legs.filter(l=>l.mode==='walk').reduce((s,l)=>s+l.r.len,0),rl=legs.filter(l=>l.mode!=='walk').reduce((s,l)=>s+l.r.len,0),segments=[],wait=false;for(let l of legs){if(l.mode!=='walk'&&!wait){segments.push({r:l.r,d:tr.wait_min,hold:true});wait=true}segments.push({r:l.r,d:l.mode==='walk'?tr.walk_min*l.r.len/(wl||1):tr.ride_min*l.r.len/(rl||1)})}if(!wl&&tr.walk_min&&segments.length)segments.unshift({r:segments[0].r,d:tr.walk_min,hold:true});return segments}function position(tr,elapsed){if(!tr.segments)tr.segments=prepare(tr);for(let s of tr.segments){if(elapsed<=s.d)return pos(s.r,s.hold?0:elapsed/(s.d||1));elapsed-=s.d}return pos(tr.segments.at(-1)?.r,1)}
-function draw(){if(!W)return;ctx.clearRect(0,0,W,H);let key=[W,H,cx,cy,zoom,$('buildings').checked,features.length].join('|');if(key!==bgKey){bgKey=key;ctx.fillStyle='#e8efea';ctx.fillRect(0,0,W,H);for(let f of features){let g=f.geometry,p=f.properties||{},kind=p.kind||p.type||p.layer||p.category||'';if(!g)continue;let building=kind==='building'||p.building,road=kind==='road'||p.highway;if(building&&(!$('buildings').checked||zoom<2))continue;let c=road?'#fff':building?'#b8c6c2':'#a9c9c3',fill=building?'#cbd6d1':kind==='water'?'#b0d9e6':kind==='green'?'#c5dfc4':null;let convert=a=>a.map(q=>[q[1],q[0]]);if(g.type==='LineString')line(convert(g.coordinates),c,road?1.4:.7);if(g.type==='Polygon'&&fill)line(convert(g.coordinates[0]),c,.5,fill)}bg.width=canvas.width;bg.height=canvas.height;bg.getContext('2d').drawImage(canvas,0,0)}else{ctx.drawImage(bg,0,0,W,H)}if($('homes').checked){let seen=new Set;for(let p of selected)if(!seen.has(p.cell)){seen.add(p.cell);dot(p.home,'#e7a03b',4)}}if($('slowroads').checked&&phase!=='before'){for(let s of slow)line([s[0],s[1]],s[2]<.8?'#c0261a':'#e0603f',s[2]<.8?3:2)}if(extra&&$('gapzones').checked){ctx.save();if(phase==='policy'){const cut=extra.policy_index.cut;for(const c of extra.cells){const [a,b]=c;const fill=c[4]?(c[3]>=cut?'rgba(192,38,26,.55)':'rgba(26,150,90,.6)'):'rgba(120,200,140,.45)';line([[a[0],a[1]],[a[0],b[1]],[b[0],b[1]],[b[0],a[1]],[a[0],a[1]]],c[4]?'#ffffffaa':'#ffffff55',.6,fill)}}
-else{ctx.setLineDash([8,6]);for(const k of ['box1','box2']){const b=extra.focus_box[k],[p0,p1]=b.bbox;line([[p0[0],p0[1]],[p0[0],p1[1]],[p1[0],p1[1]],[p1[0],p0[1]],[p0[0],p0[1]]],'#1f5fbf',2.5);const q=xy([p1[0],p0[1]]);ctx.setLineDash([]);ctx.font='bold 14px system-ui';ctx.fillStyle='#1f5fbf';ctx.fillText('흰 박스 '+b.name,q[0]+4,q[1]+16);ctx.setLineDash([8,6])}}ctx.restore()}
-if($('stations').checked&&phase==='policy'){hubs.forEach(p=>dot(p,'#078b62',7));newstops.forEach(p=>dot(p,'#e58b17',6))}let n=0,seen=new Set;for(let p of selected){let tr=p.phases[phase],out=tr.out,back=tr.back,start=p.dep+out.total+p.stay,active=t>=p.dep&&t<p.dep+out.total?out:t>=start&&t<start+back.total?back:null;if($('paths').checked){for(let l of out.legs)if(!seen.has(l.route)){seen.add(l.route);let r=routes[l.route];if(r)line(r.p,'#428b9b55',1)}}if(active){n++;dot(position(active,t-(active===out?p.dep:start)),colors[p.group],3)}}$('moving').textContent=n.toLocaleString()}
-function refresh(){let gv=$('group').value;selected=people.filter(p=>(!$('dong').value||p.dong===$('dong').value)&&(gv===''||(gv==='vul'?p.vul===1:p.group===gv)));let use=selected.filter(p=>p.phases.before.out.mode!=='walk'&&p.phases.before.out.mode!=='nopt'),mean=k=>use.reduce((s,p)=>s+p.phases[k].out.total+p.phases[k].back.total,0)/(use.length||1);$('avg').textContent=mean(phase).toFixed(2)+'분';let dd=mean(phase)-mean('before');$('saving').textContent=phase==='before'?'평균에 넣은 사람 '+use.length.toLocaleString()+'명 (걸어서만 가는 통행, 대중교통 경로 없음은 뺌)':'공사 전보다 '+(dd>=0?'+':'')+dd.toFixed(2)+'분';$('scnnote').textContent=notes[phase];$('count').textContent=selected.length.toLocaleString();let counts={};selected.forEach(p=>{let m=p.phases[phase].out.mode;counts[m]=(counts[m]||0)+1});$('modes').innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([m,n])=>`<div class="line"><span>${modes[m]||m}</span><b>${n.toLocaleString()}명</b></div><div class="bar"><i style="width:${100*n/(selected.length||1)}%"></i></div>`).join('');$('compare').innerHTML=phases.map((k,i)=>`<div class="line"><span>${names[i]}</span><b>${mean(k).toFixed(2)}분</b></div><div class="bar"><i style="width:${Math.min(100,mean(k)/Math.max(...phases.map(mean),1)*100)}%"></i></div>`).join('');simPanel();gapPanel();document.querySelectorAll('#phases button').forEach((b,i)=>b.classList.toggle('active',phases[i]===phase));draw()}
-function simPanel(){let av=(k,f)=>{let s=stats.filter(x=>x.scn===k&&f(x)!=null);return s.length?s.reduce((a,x)=>a+f(x),0)/s.length:null};let h=phases.map((k,i)=>{let v=av(k,x=>x.vul_rt);return `<div class="line"><span>${names[i]}</span><b>${v==null?'—':v.toFixed(1)+'분'}</b></div>`}).join('');h='<p class="note">교통취약계층 전체 1명 하루 평균 이동시간 (가는 길+오는 길, 걸어서만 가는 사람 포함, 반복 평균)</p>'+h;let dn={drt_south:'DRT 진잠',drt_north:'DRT 구즉',drt_acc:'특별교통수단'};h+='<p class="note">공백② 정책 차량 (3회 평균)</p>'+Object.keys(dn).map(m=>{let r=av('policy',x=>x[m]?x[m].rej:null),w=av('policy',x=>x[m]?x[m].wait:null),n=av('policy',x=>x[m]?x[m].rides:null),f=(meta.fleet||{})[m];return `<div class="line"><span>${dn[m]} ${f||''}대</span><b>${n==null?'—':Math.round(n)+'회 · 거절 '+r.toFixed(1)+'% · 대기 '+w.toFixed(1)+'분'}</b></div>`}).join('')+'<p class="note">거절: 30분 안에 태우러 갈 차가 없는 요청</p>';$('sim').innerHTML=h}
-function gapPanel(){const el=$('gapPanel');if(!extra){el.innerHTML='';return}
-let h='';const f=x=>x.toFixed(1);
-if(phase!=='policy'){const cols=[['before','공사 전'],['during','공사 중'],['focus','집중배차']];
-h+='<h3>공백① 흰 박스: 버스 배차</h3><p class="note">지도의 파란 점선 상자. 같은 버스 대수로 느리게 돌면 배차가 벌어짐 → 집중배차로 공사 전 간격으로 되돌림</p>';
-for(const k of ['box1','box2']){const b=extra.focus_box[k];
-h+=`<div class="boxcard"><b>${b.name}</b> <span class="note">${b.dongs.join(', ')} · 집중배차 노선 ${b.focus_routes}개</span><table class="gt"><tr><th></th>${cols.map(c=>`<th class="${c[0]===phase?'on':''}">${c[1]}</th>`).join('')}</tr>
-<tr><td>노선 평균 배차</td>${cols.map(c=>`<td class="${c[0]===phase?'on':''}">${f(b[c[0]].h_mean)}분</td>`).join('')}</tr>
-<tr><td>정류장 평균 기다림</td>${cols.map(c=>`<td class="${c[0]===phase?'on':''}">${b[c[0]].wait.toFixed(2)}분</td>`).join('')}</tr>
-<tr><td>주민 이동 1회</td>${cols.map(c=>`<td class="${c[0]===phase?'on':''}">${f(b[c[0]].sim_trip)}분</td>`).join('')}</tr></table>
-<p class="note">집중배차에 필요한 추가 운행: 하루 약 ${b.extra_runs}회 · 기다림 = 아무 버스나 탈 때 배차의 절반</p></div>`}}
-else{const m=extra.policy_index.main,sub=extra.policy_index.sub,bp=extra.policy_index.by_policy,cut=extra.policy_index.cut;
-const red=(1-m.mean_after/m.mean_before)*100;
-h+=`<h3>공백② 교통복합취약지수 (95칸)</h3><div class="big"><span>${m.mean_before.toFixed(3)}</span> → <strong>${m.mean_after.toFixed(3)}</strong> <em>−${red.toFixed(0)}%</em></div>
-<div class="line"><span>기준(${cut.toFixed(3)}) 넘는 칸</span><b>95칸 → ${m.above_after}칸</b></div><div class="line"><span>기준 아래로 내려간 칸의 교통취약계층</span><b>${m.vul_out.toLocaleString()}명</b></div>`;
-const nm={DRT:'DRT',저상:'저상버스·특별교통수단',생활:'생활시설 접근 개선',신설:'정류장 신설',증편:'212·마을3 증편'};const mx=Math.max(...Object.values(bp));
-h+='<p class="note">정책 하나씩만 넣었을 때 95칸 평균 지수가 줄어드는 양</p>'+Object.entries(bp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="line"><span>${nm[k]}</span><b>−${v.toFixed(3)}</b></div><div class="bar"><i style="width:${100*v/mx}%"></i></div>`).join('');
-h+=`<h3>서브: 95칸 밖도 좋아진 곳</h3><div class="line"><span>지수가 낮아진 칸</span><b>${sub.cells}칸</b></div><div class="line"><span>그 칸의 교통취약계층</span><b>${sub.vul.toLocaleString()}명</b></div><p class="note">${Object.entries(sub.by_dong).map(([d,n])=>d+' '+n+'칸').join(', ')} · 정류장 신설·증편으로 새로 '자주 오는 정류장'이 생긴 곳</p>
-<p class="note">계산: PPT와 같은 지수식. 정책이 그 칸의 문제를 기준(정류장 500m, 저상버스 정류장 500m, 생활시설 1km) 안으로 해결한다고 보고 거리를 바꿈. DRT는 거점 1.5km 안 DRT 칸. 남은 ${m.above_after}칸은 대부분 지하철역이 먼 큰 단지(연계·급행은 지수에 넣지 않음).</p>`}
-el.innerHTML=h}
-function tick(){ $('clock').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');$('time').value=t;draw()}$('phases').innerHTML=names.map((n,i)=>`<button data-i="${i}">${n}</button>`).join('');$('phases').onclick=e=>{if(e.target.dataset.i!==undefined){phase=phases[+e.target.dataset.i];refresh()}};for(let id of ['dong','group'])$(id).onchange=refresh;for(let id of ['homes','paths','stations','buildings','slowroads','gapzones'])$(id).onchange=draw;$('time').oninput=()=>{t=+$('time').value;tick()};$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Ⅱ 정지':'▶ 재생'};setInterval(()=>{if(playing){t+=+$('speed').value/4;if(t>1320)t=360;tick()}},250);$('plus').onclick=()=>{zoom*=1.4;draw()};$('minus').onclick=()=>{zoom=Math.max(.5,zoom/1.4);draw()};$('reset').onclick=()=>{zoom=1;cx=127.35;cy=36.39;draw()};canvas.onpointerdown=e=>{drag=[e.clientX,e.clientY,cx,cy];canvas.setPointerCapture(e.pointerId)};canvas.onpointermove=e=>{if(drag){cx=drag[2]-(e.clientX-drag[0])/(base*zoom*.81);cy=drag[3]+(e.clientY-drag[1])/(base*zoom);draw()}};canvas.onpointerup=()=>drag=null;canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.5,Math.min(30,zoom*Math.exp(-e.deltaY*.001)));draw()};window.onresize=resize;
-async function getParts(stem,n){let s='';for(let i=1;i<=n;i++){let r=await fetch(stem+'_part'+i+'.txt?v=20261116a',{cache:'no-cache'});if(!r.ok)throw Error('데이터 파일 없음: '+stem+'_part'+i);s+=await r.text()}return JSON.parse(s)}async function load(){try{let d=await getParts('yuseong_sim_data',9);people=d.people;routes=d.routes.map(routeInfo);hubs=d.hubs;newstops=d.newstops;tram=d.tram||[];slow=d.slow||[];stats=d.stats||[];meta=d.meta||{};let cnt={};people.forEach(p=>cnt[p.dong]=(cnt[p.dong]||0)+1);for(let n of dongs13)$('dong').add(new Option(n+' ('+(cnt[n]||0).toLocaleString()+'명)',n));try{extra=await fetch('yuseong_extra.json?v=20261116a',{cache:'no-cache'}).then(r=>r.ok?r.json():null)}catch(e){extra=null}try{let m=await getParts('yuseong_detail_map',4);features=m.features||[]}catch(e){$('status').textContent='상세 지도 없음: 경로만 표시';$('paths').checked=true}resize();refresh();tick();$('status').textContent=features.length?'로컬 데이터 로드 완료':'상세 지도 없음 · 경로 표시 중'}catch(e){$('status').textContent='오류: '+e.message}}load();
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>유성구 교통복합취약지역 정책 시뮬레이션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;800&display=swap">
+<style>
+:root{--bg:#2B2E43;--panel:#33374F;--line:#454A66;--fg:#ECEDF3;--sub:#A9ADC4;--accent:#8B5CF6;--yel:#E8C547;--green:#6CC46F;--red:#F2545B}
+*{box-sizing:border-box}html{background:#1E2030}body{margin:0;font:15px/1.55 'Noto Sans KR',system-ui,sans-serif;color:var(--fg)}
+.ys{max-width:1500px;margin:14px auto;background:var(--bg);padding:clamp(14px,2.2vw,28px);border-radius:8px}
+b{font-weight:700}.head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px}
+h1{margin:0;font-size:clamp(1.4rem,2.6vw,2rem);font-weight:800;letter-spacing:-.01em}.head span{color:var(--sub)}
+.time{margin:12px 0 6px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.time .lab{color:var(--yel);font-weight:700;margin-right:8px}.pill{font:inherit;font-size:.9rem;color:var(--sub);background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 12px;margin:2px 3px 2px 0;cursor:pointer}
+.pill[aria-pressed=true]{background:var(--yel);border-color:var(--yel);color:#1E2030;font-weight:700}.time p{margin:6px 0 0;color:var(--sub);font-size:.88rem}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:14px;margin-top:14px}
+.col{display:grid;gap:14px;align-content:start;min-width:0}
+.card{background:var(--panel);padding:14px 16px;border-radius:4px;min-width:0}
+.card h2{margin:0;font-size:1.25rem;font-weight:800}.card .n{margin:4px 0 10px;color:var(--sub);font-size:.88rem}
+.sec{color:var(--yel);font-weight:700;font-size:.92rem;margin:14px 0 6px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kpi{background:var(--bg);padding:10px 8px;text-align:center;border-radius:4px}
+.kpi h3{margin:0 0 6px;font-size:.86rem;font-weight:700;padding-bottom:6px;border-bottom:3px solid var(--accent)}.kpi .v{font-size:clamp(1.05rem,1.7vw,1.4rem);font-weight:800;font-variant-numeric:tabular-nums}
+.kpi .v i{font-style:normal;color:var(--sub);font-weight:400;font-size:.8em}.kpi .s{margin-top:2px;color:var(--sub);font-size:.78rem}
+table{width:100%;border-collapse:collapse;font-size:.88rem;font-variant-numeric:tabular-nums}
+th,td{padding:6px 6px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--sub);font-weight:400;font-size:.8rem}
+td:first-child,th:first-child{text-align:left}td.on,th.on{background:rgba(232,197,71,.14);color:var(--fg)}th.on{color:var(--yel);font-weight:700}
+.pt td{text-align:left}.pt td:last-child{text-align:right;white-space:nowrap}
+.chip{display:inline-block;border-left:4px solid var(--c);background:var(--bg);padding:1px 8px;font-weight:700}
+.note{color:var(--sub);font-size:.82rem;margin:8px 0 0}.down{color:var(--green);font-weight:700}.up{color:var(--red);font-weight:700}
+.map{position:relative;height:min(78vh,820px);min-height:460px;background:var(--bg);border-radius:4px;overflow:hidden}
+canvas{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+.tools{position:absolute;top:10px;left:10px;display:flex;gap:4px}.tools button{font:inherit;color:var(--fg);background:#33374Fee;border:1px solid var(--line);border-radius:4px;padding:4px 10px;cursor:pointer}
+.play{position:absolute;top:10px;right:10px;background:#33374Fee;border:1px solid var(--line);border-radius:4px;padding:6px 10px;display:flex;align-items:center;gap:8px}
+.play button{font:inherit;color:#1E2030;background:var(--yel);border:0;border-radius:4px;padding:3px 10px;font-weight:700;cursor:pointer}.play b{font-size:1.1rem;font-variant-numeric:tabular-nums}.play input{width:120px}
+.cap{color:var(--sub);font-size:.84rem;margin:0 0 8px}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 0;font-size:.82rem;align-items:center}
+.sw{display:inline-flex;align-items:center;gap:5px}.sw::before{content:"";display:inline-block;width:15px;height:15px;box-sizing:border-box}
+.sw.yel::before{border:2px solid #FFE066}.sw.yeld::before{border:2px dashed #FFE066}.sw.box::before{border:2px dashed #fff}.sw.drt::before{border:2px dashed #C4B5FD;border-radius:50%}
+.sw.drtc::before{background:rgba(196,181,253,.35);border:1px solid #C4B5FD;border-radius:50%}.sw.ln::before{height:0;border-top:3px solid var(--c)}.sw.lnd::before{height:0;border-top:3px dashed var(--c)}
+.sw.sq::before{background:var(--c);width:11px;height:11px}.sw.dot::before{background:var(--c);border-radius:50%;width:9px;height:9px}
+.bar{display:inline-block;width:150px;height:10px;border-radius:2px;background:linear-gradient(90deg,#2E5E8C,#7FA7C9,#F3E3B5,#F08A5D,#C0283A);vertical-align:middle;margin:0 6px}
+details{margin-top:4px}summary{cursor:pointer;font-weight:700}dl{margin:8px 0 0;display:grid;grid-template-columns:minmax(7rem,max-content) 1fr;gap:6px 14px;font-size:.86rem}dt{color:var(--yel);font-weight:700}dd{margin:0;color:var(--fg)}
+#status{color:var(--yel);font-size:.85rem}a{color:var(--sub)}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.map{height:68vh}.mapcol{order:-1}}
+</style>
+<div class="ys">
+<div class="head"><h1>트램 공사기의 이동 공백</h1><span>정책 시뮬레이션: 공백 ①, ② 정책을 실행했을 때의 결과 (대전 유성구, 250m 칸, MATSim)</span></div>
+<div class="time"><span class="lab">시점</span><span id="phases"></span><p id="scnnote"></p></div>
+<div class="grid">
+<div class="col">
+<div class="card" id="c1"></div>
+<div class="card" id="c2"></div>
+<div class="card"><details><summary>시뮬레이션 조건과 용어</summary><dl id="terms"></dl></details><p id="status">데이터 불러오는 중…</p></div>
+</div>
+<div class="col mapcol"><div class="card"><h2>지도로 보기</h2><p class="cap" id="mapcap"></p>
+<div class="map"><canvas id="map"></canvas><div class="tools"><button id="plus">＋</button><button id="minus">－</button><button id="reset">전체 보기</button></div>
+<div class="play"><button id="play">▶ 재생</button><b id="clock">07:00</b><input id="time" type="range" min="330" max="1380" value="450" aria-label="시각"></div></div>
+<div class="leg" id="leg1"></div><div class="leg" id="leg2"></div><div class="leg" id="leg3"></div>
+<p class="note">점 하나 = 시뮬레이션 속 한 사람(공백 ① 대상 3,132명과 공백 ② 교통취약계층 7,101명). 재생을 누르면 하루 동안 움직입니다. 지도: <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a></p></div></div>
+</div></div>
+<script>
+const $=id=>document.getElementById(id),PH=['before','during','focus','policy'],
+NAME={before:'트램 공사 전',during:'트램 공사 중',focus:'공사 중 + 공백 ① 정책',policy:'공사 중 + 공백 ①② 정책'},
+SHORT={before:'공사 전',during:'공사 중',focus:'공백 ① 정책',policy:'공백 ①② 정책'},
+NOTE={before:'2024년 10월 버스 속도와 배차입니다. 정책은 넣지 않았습니다.',
+during:'지금 상태입니다. 2026년 10월 버스 속도를 씁니다. 버스 대수는 그대로라 느려진 만큼 배차 간격이 벌어집니다.',
+focus:'공사 중에 공백 ① 정책(집중배차)을 넣었습니다. 대상 노선의 배차 간격을 공사 전으로 되돌리고, 출퇴근 시간에는 1.5배로 더 자주 보냅니다.',
+policy:'공사 중에 공백 ① 정책(집중배차)과 공백 ② 정책(수요 집중 단지 연계·증편·급행, 저상버스·특별교통수단 연계, 정류장 신설, 생활시설 접근 개선, DRT)을 모두 넣었습니다.'},
+PCOL={'정류장 신설·노선 연장':'#F2545B','증편·노선 변경':'#F08A5D','DRT':'#A78BFA','저상버스·특별교통수단 연계':'#4FC3D9','생활시설 접근 개선':'#E8C547','수요 집중 단지':'#6CC46F'},
+DOT={bus:'#FFFFFF',subway:'#FFFFFF',drt:'#C4B5FD',acc:'#4FC3D9',walk:'#A9ADC4',car:'#6B7190'},HEAT=['#2E5E8C','#7FA7C9','#F3E3B5','#F08A5D','#C0283A'],HMAX=.32;
+let phase='during',people=[],routes=[],features=[],D={},X=null,t=450,playing=false,zoom=1,cx=127.345,cy=36.385,base=1,drag=null,W,H;
+const canvas=$('map'),ctx=canvas.getContext('2d'),bg=document.createElement('canvas');let bgKey='';
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function heat(v,a){let x=Math.max(0,Math.min(1,v/HMAX))*(HEAT.length-1),i=Math.min(HEAT.length-2,Math.floor(x)),k=x-i,p=hex(HEAT[i]),q=hex(HEAT[i+1]);return `rgba(${p.map((c,j)=>Math.round(c+(q[j]-c)*k)).join(',')},${a})`}
+function resize(){W=canvas.clientWidth;H=canvas.clientHeight;canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);base=Math.min(W/.20,H/.255);draw()}
+function xy(p){return [W/2+(p[1]-cx)*base*zoom*.805,H/2-(p[0]-cy)*base*zoom]}
+function line(pts,color,width,fill,dash){if(!pts.length)return;ctx.beginPath();pts.forEach((p,i)=>{let q=xy(p);i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])});if(fill){ctx.fillStyle=fill;ctx.fill()}if(color){ctx.setLineDash(dash||[]);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke();ctx.setLineDash([])}}
+function dot(p,c,r,stroke){if(!p)return;let q=xy(p);ctx.beginPath();ctx.arc(q[0],q[1],r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke()}}
+function label(p,txt,color,size,dy){let q=xy(p);ctx.font=`700 ${size||13}px 'Noto Sans KR',sans-serif`;ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#1E2030';ctx.strokeText(txt,q[0],q[1]+(dy||0));ctx.fillStyle=color;ctx.fillText(txt,q[0],q[1]+(dy||0))}
+function rect(a,b){return [[a[0],a[1]],[a[0],b[1]],[b[0],b[1]],[b[0],a[1]],[a[0],a[1]]]}
+function routeInfo(p){let cum=[0];for(let i=1;i<p.length;i++)cum.push(cum[i-1]+Math.hypot((p[i][1]-p[i-1][1])*.805,p[i][0]-p[i-1][0]));return {p,cum,len:cum.at(-1)||0}}
+function pos(r,f){if(!r||!r.p.length)return null;let d=r.len*Math.max(0,Math.min(1,f)),a=0,b=r.p.length-1;while(a<b){let m=(a+b)>>1;if(r.cum[m]<d)a=m+1;else b=m}if(!a)return r.p[0];let k=(d-r.cum[a-1])/(r.cum[a]-r.cum[a-1]||1);return r.p[a-1].map((v,j)=>v+(r.p[a][j]-v)*k)}
+const kind=m=>m==='walk'?'walk':m==='car'?'car':m==='drt_acc'?'acc':m.startsWith('drt')?'drt':m==='subway'?'subway':'bus';
+function prepare(tr){let legs=tr.legs.map(l=>({...l,r:routes[l.route]})).filter(l=>l.r&&l.r.p.length),wl=legs.filter(l=>l.mode==='walk').reduce((s,l)=>s+l.r.len,0),rl=legs.filter(l=>l.mode!=='walk').reduce((s,l)=>s+l.r.len,0),seg=[],wait=false;
+for(let l of legs){if(l.mode!=='walk'&&!wait){seg.push({r:l.r,d:tr.wait_min,hold:true,k:'walk'});wait=true}seg.push({r:l.r,k:kind(l.mode),d:l.mode==='walk'?tr.walk_min*l.r.len/(wl||1):tr.ride_min*l.r.len/(rl||1)})}
+if(!wl&&tr.walk_min&&seg.length)seg.unshift({r:seg[0].r,d:tr.walk_min,hold:true,k:'walk'});return seg}
+function position(tr,el){if(!tr.seg)tr.seg=prepare(tr);for(let s of tr.seg){if(el<=s.d)return [pos(s.r,s.hold?0:el/(s.d||1)),s.k];el-=s.d}let s=tr.seg.at(-1);return s?[pos(s.r,1),s.k]:[null,'walk']}
+function draw(){if(!W||!X)return;ctx.clearRect(0,0,W,H);const pol=phase==='policy',cut=X.cut;
+let key=[W,H,cx,cy,zoom,features.length,pol].join('|');
+if(key!==bgKey){bgKey=key;ctx.fillStyle='#2B2E43';ctx.fillRect(0,0,W,H);
+ for(let f of features){let g=f.geometry,p=f.properties||{},kd=p.kind||p.type||p.layer||p.category||'';if(!g)continue;let building=kd==='building'||p.building,road=kd==='road'||p.highway;if(building)continue;let cv=a=>a.map(q=>[q[1],q[0]]);
+  if(g.type==='Polygon'){let fill=kd==='water'?'#27405A':kd==='green'?'#2D3B42':null;if(fill)line(cv(g.coordinates[0]),null,0,fill)}}
+ for(const c of X.cells){const v=pol?c[5]:c[4];line(rect([c[0],c[1]],[c[2],c[3]]),null,0,heat(v,.82))}
+ for(let f of features){let g=f.geometry,p=f.properties||{},kd=p.kind||p.type||p.layer||p.category||'';if(!g||g.type!=='LineString')continue;let road=kd==='road'||p.highway;line(g.coordinates.map(q=>[q[1],q[0]]),road?'rgba(236,237,243,.11)':'rgba(169,173,196,.09)',road?1:.6)}
+ for(const d of X.dongs)for(const r of d.rings)line(r,'#A9ADC4',1);
+ bg.width=canvas.width;bg.height=canvas.height;bg.getContext('2d').drawImage(canvas,0,0)}
+else ctx.drawImage(bg,0,0,W,H);
+// 지하철 1호선
+line(D.subway.map(s=>s.p),'rgba(236,237,243,.55)',2);D.subway.forEach(s=>dot(s.p,'#2B2E43',3,'#ECEDF3'));
+// 공사 기간에 느려진 도로
+if(phase!=='before')for(const s of D.slow)line([s[0],s[1]],'#F2545B',s[2]<.8?3:2);
+// 교통복합취약지역 테두리
+for(const c of X.cells){if(!c[6])continue;const still=!pol||c[5]>=cut;line(rect([c[0],c[1]],[c[2],c[3]]),'#FFE066',still?1.6:1,null,still?null:[3,3])}
+// 흰 상자
+for(const k of ['box1','box2']){const b=X.focus_box[k];line(rect(b.bbox[0],b.bbox[1]),'#FFFFFF',2,null,[8,6]);{const q=xy([b.bbox[1][0],b.bbox[0][1]]);ctx.font="700 13px 'Noto Sans KR',sans-serif";ctx.textAlign='left';ctx.lineWidth=3;ctx.strokeStyle='#1E2030';ctx.strokeText('흰 상자 '+b.name,q[0]+2,q[1]-7);ctx.fillStyle='#fff';ctx.fillText('흰 상자 '+b.name,q[0]+2,q[1]-7)}}
+if(pol){const r=1500/110540*base*zoom;D.hubs.forEach((p,i)=>{const q=xy(p);ctx.beginPath();ctx.arc(q[0],q[1],r,0,Math.PI*2);ctx.setLineDash([6,5]);ctx.strokeStyle='#C4B5FD';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);dot(p,'rgba(196,181,253,.35)',7,'#C4B5FD');label(p,'DRT '+(i+1),'#C4B5FD',12,-r-5)});
+ line(D.shuttle,'#6CC46F',3);line(D.express,'#6CC46F',3,null,[5,5]);
+ D.newstops.forEach(p=>{const q=xy(p);ctx.fillStyle='#F2545B';ctx.fillRect(q[0]-5,q[1]-5,10,10);ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.strokeRect(q[0]-5,q[1]-5,10,10)})}
+for(const d of X.dongs)label(d.c,d.name,'#FFFFFF',13);
+for(const p of people){const tr=p.phases[phase],out=tr.out,back=tr.back,st=p.dep+out.total+p.stay,act=t>=p.dep&&t<p.dep+out.total?out:t>=st&&t<st+back.total?back:null;if(!act)continue;const [q,k]=position(act,t-(act===out?p.dep:st));dot(q,DOT[k],k==='walk'||k==='car'?2:3)}}
+const f1=x=>x.toFixed(1),f2=x=>x.toFixed(2),nf=x=>Math.round(x).toLocaleString();
+function diff(a,b,unit){const d=b-a;if(Math.abs(d)<.005)return '<span class="note">변화 없음</span>';return `<span class="${d<0?'down':'up'}">${d>0?'+':'−'}${Math.abs(d).toFixed(unit==='분'?1:2)}${unit}</span>`}
+function panel(){if(!X)return;const S=X.summary,B=X.focus_box,cols=['before','during','focus'],on=k=>k===phase||(phase==='policy'&&k==='focus')?' class="on"':'';
+let h=`<h2>공백 ① 공사 주변</h2><p class="n">정책: 집중배차로 원래 배차 간격 유지, 출퇴근 시간에는 더 촘촘하게<br>대상: ${nf(S.gap1.all.n)}명(교통취약계층 ${nf(S.gap1.vul.n)}명), ${S.gap1.cells}칸</p>
+<table><tr><th></th>${cols.map(k=>`<th${on(k)}>${SHORT[k]}</th>`).join('')}</tr>
+${['box1','box2'].map(b=>`<tr><td>흰 상자 ${B[b].name} 출퇴근 배차 간격</td>${cols.map(k=>`<td${on(k)}>${f1(B[b][k].h_mean)}분</td>`).join('')}</tr>`).join('')}
+<tr><td>기다리는 시간 (하루)</td>${cols.map(k=>`<td${on(k)}>${f1(S.gap1.pt['wait_'+k])}분</td>`).join('')}</tr>
+<tr><td>하루 이동시간</td>${cols.map(k=>`<td${on(k)}>${f1(S.gap1.pt[k])}분</td>`).join('')}</tr></table>
+<p class="note">배차 간격: 집중배차 노선 한 개가 평균 몇 분마다 오는지(흰 상자 ① ${B.box1.focus_routes}개, ② ${B.box2.focus_routes}개 노선). 기다리는 시간과 하루 이동시간: 대상 중 대중교통을 타는 ${nf(S.gap1.pt.n)}명의 평균(가는 길 + 오는 길).</p>
+<div class="sec">공사 기간에 늘어난 이동시간을 얼마나 되돌리나</div>
+<table><tr><td>공사 기간에 늘어난 시간</td><td>${diff(S.gap1.pt.before,S.gap1.pt.during,'분')}</td></tr>
+<tr><td>배차 간격만 공사 전으로 되돌리면</td><td>${diff(S.gap1.pt.during,S.gap1.keep.pt,'분')}</td></tr>
+<tr><td><b>출퇴근 시간에 1.5배로 집중배차하면</b></td><td>${diff(S.gap1.pt.during,S.gap1.pt.focus,'분')}</td></tr></table>
+<p class="note">집중배차를 하면 하루 이동시간이 ${f1(S.gap1.pt.focus)}분으로, 공사 전(${f1(S.gap1.pt.before)}분) 수준으로 돌아옵니다. 필요한 추가 운행은 하루 약 ${nf(X.extra_runs)}회(대상 노선 운행의 +${X.extra_pct}%)입니다. 간격만 되돌릴 때는 약 ${nf(X.keep_runs)}회입니다.</p>`;
+$('c1').innerHTML=h;
+const m=X.policy_index.main,sub=X.policy_index.sub,G=S.gap2.all,T=X.targets,P=S.policy,red=(1-m.mean_after/m.mean_before)*100,on2=k=>k===phase?' class="on"':'';
+const res=(o)=>`${f1(o.focus)} → <b>${f1(o.policy)}분</b>`;
+const row=(pk,name,tg,what,r)=>`<tr><td><span class="chip" style="--c:${PCOL[pk]}">${name}</span><br><span class="note">${tg}</span></td><td>${what}</td><td>${r}</td></tr>`;
+const d=S.drt,fl=S.fleet;
+h=`<h2>공백 ② 교통복합취약지역</h2><p class="n">정책: 칸마다 불편한 이유에 맞춘 정책<br>대상: ${m.cells}칸, 교통취약계층 ${nf(T.total)}명</p>
+<div class="kpis"><div class="kpi"><h3>교통복합취약지수</h3><div class="v"><i>${m.mean_before.toFixed(3)} →</i> ${m.mean_after.toFixed(3)}</div><div class="s">${m.cells}칸 평균, −${red.toFixed(0)}%</div></div>
+<div class="kpi"><h3>교통복합취약지역</h3><div class="v"><i>${m.cells}칸 →</i> ${m.above_after}칸</div><div class="s">기준선 ${X.cut.toFixed(3)} 이상인 칸</div></div>
+<div class="kpi"><h3>하루 이동시간</h3><div class="v"><i>${f1(G.during)} →</i> ${f1(G.policy)}분</div><div class="s">교통취약계층 ${nf(G.n)}명 평균</div></div></div>
+<div class="sec">교통취약계층 ${nf(G.n)}명의 하루 이동시간</div>
+<table><tr><th></th>${PH.map(k=>`<th${on2(k)}>${SHORT[k]}</th>`).join('')}</tr><tr><td>가는 길 + 오는 길</td>${PH.map(k=>`<td${on2(k)}>${f1(G[k])}분</td>`).join('')}</tr>
+<tr><td>그중 기다리는 시간</td>${PH.map(k=>`<td${on2(k)}>${f1(G['wait_'+k])}분</td>`).join('')}</tr></table>
+<div class="sec">정책별 결과 (그 칸에 사는 교통취약계층의 하루 이동시간, 공백 ① 정책 → 공백 ①② 정책)</div>
+<table class="pt"><tr><th>정책 · 대상</th><th>시뮬레이션에 넣은 내용</th><th>결과</th></tr>
+${row('수요 집중 단지','수요 집중 단지: 연계·증편·급행',`${T['수요 집중 단지'].cells}칸 · ${nf(T['수요 집중 단지'].vul)}명`,`진잠: 212번·마을3번 배차 20분, ${S.shuttle.station}역 연계 노선(배차 ${S.shuttle.headway}분, 편도 ${S.shuttle.oneway_min}분)<br>구즉: 출근 7~9시 6개 노선 운행 1.5배, 301번 출퇴근 급행(${S.express.save_min}분 단축)`,`진잠 ${res(P['수요_진잠동'])}<br>구즉 ${res(P['수요_구즉동'])}`)}
+${row('저상버스·특별교통수단 연계','저상버스·특별교통수단 연계',`${T['저상버스·특별교통수단 연계'].cells}칸 · ${nf(T['저상버스·특별교통수단 연계'].vul)}명`,`특별교통수단 ${fl.drt_acc}대(4인승), 그 칸의 장애인 이용<br>하루 ${nf(d.drt_acc.rides)}회, 평균 대기 ${f1(d.drt_acc.wait)}분`,`장애인 ${res(P['저상_장애인'])}`)}
+${row('정류장 신설·노선 연장','정류장 신설·노선 연장',`${T['정류장 신설·노선 연장'].cells}칸 · ${nf(T['정류장 신설·노선 연장'].vul)}명`,`버스가 자주 오는 노선에 정류장 3곳 신설`,res(P['신설']))}
+${row('생활시설 접근 개선','생활시설 접근 개선',`${T['생활시설 접근 개선'].cells}칸 · ${nf(T['생활시설 접근 개선'].vul)}명`,`DRT로 생활시설까지 연결`,res(P['생활']))}
+${row('DRT','DRT',`${T['DRT'].cells}칸 · ${nf(T['DRT'].vul)}명`,`진잠 ${fl.drt_south}대, 구즉 ${fl.drt_north}대(15인승), 거점 5곳<br>하루 ${nf(d.drt_south.rides+d.drt_north.rides)}회, 평균 대기 진잠 ${f1(d.drt_south.wait)}분, 구즉 ${f1(d.drt_north.wait)}분<br>30분 안에 못 탄 요청 진잠 ${f1(d.drt_south.rej)}%, 구즉 ${f1(d.drt_north.rej)}%`,res(P['DRT']))}
+${row('증편·노선 변경','버스 증편·노선 변경','해당 칸 없음','모두 150명 미만이라 DRT로','<span class="note">없음</span>')}</table>
+<p class="note">한 칸에 정책이 여러 개 붙어서 대상 합계는 ${m.cells}칸보다 많습니다. 정책 전에 버스로 갈 길이 없어 끝까지 걸어간 사람은 ${nf(S.modes.nopt_before)}명에서 ${nf(S.modes.nopt_policy)}명으로 줄었습니다.</p>
+<div class="sec">교통복합취약지역 밖에서도 좋아진 곳</div>
+<table><tr><td>교통복합취약지수가 낮아진 칸</td><td><b>${sub.cells}칸</b></td></tr><tr><td>그 칸의 교통취약계층</td><td><b>${nf(sub.vul)}명</b></td></tr></table>
+<p class="note">${Object.entries(sub.by_dong).map(([a,b])=>a+' '+b+'칸').join(', ')}. 정류장 신설과 증편으로 버스가 자주 오는 정류장이 새로 가까워진 칸입니다.</p>
+<p class="note">교통복합취약지수는 PPT와 같은 식(교통취약계층 점수 × 교통취약지역 점수)으로 다시 계산했습니다. 정책이 그 칸의 거리를 기준(버스가 자주 오는 정류장 500m, 저상버스 정류장 500m, 생활시설 1km, 지하철역 2km)까지 줄인다고 봤습니다. 남은 ${m.above_after}칸: 구즉 수요 집중 단지 ${X.remain['수요']}칸(증편과 급행은 거리 지표를 바꾸지 못함), DRT 거점 반경 1.5km 밖 ${X.remain['DRT']}칸, 정류장을 새로 만들어도 지하철역이 먼 ${X.remain['신설']}칸.</p>`;
+$('c2').innerHTML=h;
+$('scnnote').textContent=NAME[phase]+': '+NOTE[phase];
+document.querySelectorAll('#phases button').forEach((b,i)=>b.setAttribute('aria-pressed',String(PH[i]===phase)));
+const pol=phase==='policy',n=X.cells.filter(c=>c[6]&&(!pol||c[5]>=X.cut)).length;
+$('mapcap').textContent='칸 색 = 교통복합취약지수'+(pol?'(정책 후)':'')+'. 노란 테두리 = 교통복합취약지역(상위 10%). 흰 상자 = 공백 ① 집중배차 구역.';
+$('leg1').innerHTML=`<span>0.00<span class="bar"></span>0.32 이상</span><span class="sw yel">교통복합취약지역 (${n}칸)</span>${pol?`<span class="sw yeld">정책 후 기준선 아래로 내려간 칸 (${m.cells-n}칸)</span>`:''}<span class="sw box">흰 상자 ① 유성 도심, ② 진잠</span>`;
+$('leg2').innerHTML=(phase!=='before'?`<span class="sw ln" style="--c:#F2545B">공사 기간에 버스가 10% 넘게 느려진 도로</span>`:'')+`<span class="sw ln" style="--c:rgba(236,237,243,.7)">지하철 1호선</span>`+(pol?`<span class="sw drt">DRT 거점 반경 1.5km</span><span class="sw drtc">DRT 거점 중심</span><span class="sw sq" style="--c:#F2545B">정류장 신설</span><span class="sw ln" style="--c:#6CC46F">지하철역 연계 노선</span><span class="sw lnd" style="--c:#6CC46F">301번 급행이 서지 않는 구간</span>`:'');
+$('leg3').innerHTML=`<span class="sw dot" style="--c:#FFFFFF">버스·지하철 타는 중</span>`+(pol?`<span class="sw dot" style="--c:#C4B5FD">DRT</span><span class="sw dot" style="--c:#4FC3D9">특별교통수단</span>`:'')+`<span class="sw dot" style="--c:#A9ADC4">걷거나 기다리는 중</span><span class="sw dot" style="--c:#6B7190">자가용</span>`;
+draw()}
+function terms(){const S=X.summary,r=S.runs;$('terms').innerHTML=[
+['칸','유성구를 250m × 250m 격자로 나눈 한 칸. 사람이 사는 칸은 943개입니다.'],
+['교통취약계층','65세 이상, 장애인, 7~18세 학생. 장애인은 65세 이상과 겹치는 몫을 빼려고 ×0.52로 셉니다.'],
+['교통복합취약지역','교통복합취약지수(교통취약계층 점수 × 교통취약지역 점수) 상위 10%인 95칸, 교통취약계층 7,101명.'],
+['공백 ① 대상','공사 기간에 버스가 느려져 정류장이 500m 넘게 먼 셈이 된 주민 3,132명(교통취약계층 843명), 21칸.'],
+['하루 이동시간','한 사람이 집에서 목적지까지 가는 길과 돌아오는 길에 쓴 시간의 합(걷기 + 기다리기 + 타기).'],
+['이동 방법','교통취약계층은 대중교통(버스, 지하철, DRT, 특별교통수단)만 탑니다. 공백 ① 대상 중 일반 주민은 걷기·자가용·대중교통을 실제 비율(KTDB 2024)대로 나눴습니다.'],
+['목적지','65세 이상은 병원·약국, 복지관, 시장·마트, 공공기관. 장애인은 병원·약국, 장애인시설, 공공기관. 학생은 중·고등학교. 가는 동은 KTDB 2024 통행 분포를 따르고, 800m 안은 걸어가는 통행이라 뺐습니다.'],
+['버스','유성구를 지나는 68개 노선. 노선별 공식 배차, 첫차, 막차(2026년 11월 2일). 속도는 정류장 구간별 실측(평일 출근 7~9시)입니다.'],
+['지하철','1호선 22개 역(공식 위치). 판암~반석 약 40분, 출퇴근(7~9시, 18~20시) 5분 간격, 그 밖 8분 간격(가정)으로 넣었습니다.'],
+['트램 공사 전 / 공사 중','공사 전 = 2024년 10월, 공사 중 = 2026년 10월 버스 속도. 버스 대수가 같아 느려진 만큼 배차 간격이 벌어집니다. 공사 기간에 관측된 변화이며 공사만의 몫은 아닙니다.'],
+['집중배차','공백 ① 21칸의 800m 안 정류장을 지나는 '+D.meta.focus_routes+'개 노선의 배차 간격을 공사 전으로 되돌리고, 출퇴근 시간(7~9시, 18~20시)에는 1.5배로 운행합니다. 1.5배는 시뮬레이션을 위해 정한 가정입니다.'],
+['DRT','부르면 오는 소형 버스(15인승). 거점 5곳에서 출발합니다. 진잠 12대, 구즉 4대에서 시작해 30분 안에 못 탄 요청이 10% 안팎이 될 때까지 늘려 진잠 18대, 구즉 6대가 됐습니다. 특별교통수단도 같은 방법으로 8대입니다. 30분 안에 못 탄 사람은 버스를 탄 것으로 계산합니다.'],
+['수요 집중 단지','버스는 가깝지만 지하철역이 먼 큰 단지 6칸. 진잠(지하철역 약 6km): 212번·마을3번을 20분 배차로, 단지 앞 정류장('+S.shuttle.stops.join(', ')+')에서 '+S.shuttle.station+'역까지 연계 노선. 구즉(9~10km): 급행2·301·802·708·마을5·첨단1번을 출근 7~9시에 1.5배로, 301번 출퇴근 회차의 절반은 연구단지 9개 정류장을 서지 않는 급행. 증편 폭, 연계 노선 경로, 급행 비율은 시뮬레이션을 위해 정한 가정입니다.'],
+['반복 횟수','버스 출발 시각을 바꿔 가며 공사 전·공사 중·공백 ① 정책 '+r.before+'번, 공백 ①② 정책 '+r.policy+'번 돌린 평균입니다.'],
+['걷는 속도','분당 67m. 기준값(정류장 500m, 생활시설 1km, 지하철역 2km, 칸 인구 150명, DRT 거점 반경 1.5km)은 PPT, 유성구 교통복합취약지역 지도와 같습니다.']
+].map(([a,b])=>`<dt>${a}</dt><dd>${b}</dd>`).join('')}
+function tick(){$('clock').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');$('time').value=t;draw()}
+$('phases').innerHTML=PH.map((k,i)=>`<button class="pill" data-i="${i}" aria-pressed="false">${NAME[k]}</button>`).join('');
+$('phases').onclick=e=>{if(e.target.dataset.i!==undefined){phase=PH[+e.target.dataset.i];panel()}};
+$('time').oninput=()=>{t=+$('time').value;tick()};$('play').onclick=()=>{playing=!playing;$('play').textContent=playing?'Ⅱ 정지':'▶ 재생'};
+setInterval(()=>{if(playing){t+=2.5;if(t>1380)t=330;tick()}},100);
+$('plus').onclick=()=>{zoom*=1.4;draw()};$('minus').onclick=()=>{zoom=Math.max(.5,zoom/1.4);draw()};$('reset').onclick=()=>{zoom=1;cx=127.345;cy=36.385;draw()};
+canvas.onpointerdown=e=>{drag=[e.clientX,e.clientY,cx,cy];canvas.setPointerCapture(e.pointerId)};canvas.onpointermove=e=>{if(drag){cx=drag[2]-(e.clientX-drag[0])/(base*zoom*.805);cy=drag[3]+(e.clientY-drag[1])/(base*zoom);draw()}};canvas.onpointerup=()=>drag=null;
+canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.5,Math.min(30,zoom*Math.exp(-e.deltaY*.001)));draw()};window.onresize=resize;
+async function getParts(stem,n){let s='';for(let i=1;i<=n;i++){let r=await fetch(stem+'_part'+i+'.txt?v=20261116c',{cache:'no-cache'});if(!r.ok)throw Error('데이터 파일 없음: '+stem+'_part'+i);s+=await r.text()}return JSON.parse(s)}
+async function load(){try{X=await fetch('yuseong_extra.json?v=20261116c',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('데이터 파일 없음: yuseong_extra.json');return r.json()});
+D={subway:[],slow:[],hubs:[],newstops:[],shuttle:[],express:[],meta:{focus_routes:X.focus_routes}};panel();terms();resize();
+$('status').textContent='결과 숫자 표시 완료. 지도와 사람 이동 자료 불러오는 중…';
+const d=await getParts('yuseong_sim_data',7);people=d.people;routes=d.routes.map(routeInfo);D=d;terms();draw();
+try{const m=await getParts('yuseong_detail_map',4);features=m.features||[]}catch(e){}
+bgKey='';resize();tick();$('status').textContent=''}catch(e){$('status').textContent='오류: '+e.message}}
+load();
 </script></html>
