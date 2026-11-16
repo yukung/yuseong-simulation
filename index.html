@@ -107,29 +107,31 @@ for(const p of people){const tr=p.phases[phase],out=tr.out,back=tr.back,st=p.dep
 const f1=x=>x.toFixed(1),f2=x=>x.toFixed(2),nf=x=>Math.round(x).toLocaleString();
 function diff(a,b,unit){const d=b-a;if(Math.abs(d)<.005)return '<span class="note">변화 없음</span>';return `<span class="${d<0?'down':'up'}">${d>0?'+':'−'}${Math.abs(d).toFixed(unit==='분'?1:2)}${unit}</span>`}
 function panel(){if(!X)return;const S=X.summary,B=X.focus_box,cols=['before','during','focus'],on=k=>k===phase||(phase==='policy'&&k==='focus')?' class="on"':'';
+const inc=S.gap1.pt.during-S.gap1.pt.before,rk=Math.round((S.gap1.pt.during-S.gap1.keep.pt)/inc*100),rf=Math.round((S.gap1.pt.during-S.gap1.pt.focus)/inc*100);
 let h=`<h2>공백 ① 공사 주변</h2><p class="n">정책: 집중배차로 원래 배차 간격 유지, 출퇴근 시간에는 더 촘촘하게<br>대상: ${nf(S.gap1.all.n)}명(교통취약계층 ${nf(S.gap1.vul.n)}명), ${S.gap1.cells}칸</p>
+<div class="sec">공사 기간에 늘어난 이동시간을 얼마나 되돌리나</div>
+<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="kpi"><h3>배차 간격만 공사 전으로 되돌리면</h3><div class="v" style="color:var(--sub)">${rk}%</div><div class="s">${diff(S.gap1.pt.during,S.gap1.keep.pt,'분')}</div></div>
+<div class="kpi"><h3>출퇴근 시간에 1.5배로 집중배차하면</h3><div class="v">${Math.min(100,rf)}%</div><div class="s">${diff(S.gap1.pt.during,S.gap1.pt.focus,'분')} (공사 전 수준 회복)</div></div></div>
+<p class="note">공사 기간에 하루 이동시간이 ${f1(S.gap1.pt.before)}분에서 ${f1(S.gap1.pt.during)}분으로 ${f1(inc)}분 늘었습니다. 위 숫자는 그중 얼마를 되돌렸는지입니다(집중배차는 ${rf}%라 100%로 표시). 막힌 도로는 그대로지만 기다리는 시간을 줄여 되돌립니다. 필요한 추가 운행은 하루 약 ${nf(X.extra_runs)}회(대상 노선 운행의 +${X.extra_pct}%), 간격만 되돌릴 때는 약 ${nf(X.keep_runs)}회입니다.</p>
 <table><tr><th></th>${cols.map(k=>`<th${on(k)}>${SHORT[k]}</th>`).join('')}</tr>
 ${['box1','box2'].map(b=>`<tr><td>흰 상자 ${B[b].name} 출퇴근 배차 간격</td>${cols.map(k=>`<td${on(k)}>${f1(B[b][k].h_mean)}분</td>`).join('')}</tr>`).join('')}
 <tr><td>기다리는 시간 (하루)</td>${cols.map(k=>`<td${on(k)}>${f1(S.gap1.pt['wait_'+k])}분</td>`).join('')}</tr>
 <tr><td>하루 이동시간</td>${cols.map(k=>`<td${on(k)}>${f1(S.gap1.pt[k])}분</td>`).join('')}</tr></table>
 <p class="note">배차 간격: 집중배차 노선 한 개가 평균 몇 분마다 오는지(흰 상자 ① ${B.box1.focus_routes}개, ② ${B.box2.focus_routes}개 노선). 기다리는 시간과 하루 이동시간: 대상 중 대중교통을 타는 ${nf(S.gap1.pt.n)}명의 평균(가는 길 + 오는 길).</p>
-<div class="sec">공사 기간에 늘어난 이동시간을 얼마나 되돌리나</div>
-<table><tr><td>공사 기간에 늘어난 시간</td><td>${diff(S.gap1.pt.before,S.gap1.pt.during,'분')}</td></tr>
-<tr><td>배차 간격만 공사 전으로 되돌리면</td><td>${diff(S.gap1.pt.during,S.gap1.keep.pt,'분')}</td></tr>
-<tr><td><b>출퇴근 시간에 1.5배로 집중배차하면</b></td><td>${diff(S.gap1.pt.during,S.gap1.pt.focus,'분')}</td></tr></table>
-<p class="note">집중배차를 하면 하루 이동시간이 ${f1(S.gap1.pt.focus)}분으로, 공사 전(${f1(S.gap1.pt.before)}분) 수준으로 돌아옵니다. 필요한 추가 운행은 하루 약 ${nf(X.extra_runs)}회(대상 노선 운행의 +${X.extra_pct}%)입니다. 간격만 되돌릴 때는 약 ${nf(X.keep_runs)}회입니다.</p>`;
+`;
 $('c1').innerHTML=h;
 const m=X.policy_index.main,sub=X.policy_index.sub,G=S.gap2.all,T=X.targets,P=S.policy,red=(1-m.mean_after/m.mean_before)*100,on2=k=>k===phase?' class="on"':'';
 const res=(o)=>`${f1(o.focus)} → <b>${f1(o.policy)}분</b>`;
 const row=(pk,name,tg,what,r)=>`<tr><td><span class="chip" style="--c:${PCOL[pk]}">${name}</span><br><span class="note">${tg}</span></td><td>${what}</td><td>${r}</td></tr>`;
 const d=S.drt,fl=S.fleet;
 h=`<h2>공백 ② 교통복합취약지역</h2><p class="n">정책: 칸마다 불편한 이유에 맞춘 정책<br>대상: ${m.cells}칸, 교통취약계층 ${nf(T.total)}명</p>
-<div class="kpis"><div class="kpi"><h3>교통복합취약지수</h3><div class="v"><i>${m.mean_before.toFixed(3)} →</i> ${m.mean_after.toFixed(3)}</div><div class="s">${m.cells}칸 평균, −${red.toFixed(0)}%</div></div>
+<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="kpi"><h3>교통복합취약지수</h3><div class="v"><i>${m.mean_before.toFixed(3)} →</i> ${m.mean_after.toFixed(3)}</div><div class="s">${m.cells}칸 평균, −${red.toFixed(0)}%</div></div>
 <div class="kpi"><h3>교통복합취약지역</h3><div class="v"><i>${m.cells}칸 →</i> ${m.above_after}칸</div><div class="s">기준선 ${X.cut.toFixed(3)} 이상인 칸</div></div>
-<div class="kpi"><h3>하루 이동시간</h3><div class="v"><i>${f1(G.during)} →</i> ${f1(G.policy)}분</div><div class="s">교통취약계층 ${nf(G.n)}명 평균</div></div></div>
+</div></div>
 <div class="sec">교통취약계층 ${nf(G.n)}명의 하루 이동시간</div>
 <table><tr><th></th>${PH.map(k=>`<th${on2(k)}>${SHORT[k]}</th>`).join('')}</tr><tr><td>가는 길 + 오는 길</td>${PH.map(k=>`<td${on2(k)}>${f1(G[k])}분</td>`).join('')}</tr>
 <tr><td>그중 기다리는 시간</td>${PH.map(k=>`<td${on2(k)}>${f1(G['wait_'+k])}분</td>`).join('')}</tr></table>
+<p class="note">공백 ② 정책에서 기다리는 시간이 늘어나는 이유: DRT와 특별교통수단은 부르고 기다리는 시간(평균 약 15분)이 생깁니다. 대신 정류장까지 걷는 시간과 타는 시간이 ${f1((G.focus-G.wait_focus)-(G.policy-G.wait_policy))}분 줄어, 전체는 ${f1(G.focus-G.policy)}분 줄어듭니다.</p>
 <div class="sec">정책별 결과 (그 칸에 사는 교통취약계층의 하루 이동시간, 공백 ① 정책 → 공백 ①② 정책)</div>
 <table class="pt"><tr><th>정책 · 대상</th><th>시뮬레이션에 넣은 내용</th><th>결과</th></tr>
 ${row('수요 집중 단지','수요 집중 단지: 연계·증편·급행',`${T['수요 집중 단지'].cells}칸 · ${nf(T['수요 집중 단지'].vul)}명`,`진잠: 212번·마을3번 배차 20분, ${S.shuttle.station}역 연계 노선(배차 ${S.shuttle.headway}분, 편도 ${S.shuttle.oneway_min}분)<br>구즉: 출근 7~9시 6개 노선 운행 1.5배, 301번 출퇴근 급행(${S.express.save_min}분 단축)`,`진잠 ${res(P['수요_진잠동'])}<br>구즉 ${res(P['수요_구즉동'])}`)}
@@ -177,8 +179,8 @@ setInterval(()=>{if(playing){t+=2.5;if(t>1380)t=330;tick()}},100);
 $('plus').onclick=()=>{zoom*=1.4;draw()};$('minus').onclick=()=>{zoom=Math.max(.5,zoom/1.4);draw()};$('reset').onclick=()=>{zoom=1;cx=127.345;cy=36.385;draw()};
 canvas.onpointerdown=e=>{drag=[e.clientX,e.clientY,cx,cy];canvas.setPointerCapture(e.pointerId)};canvas.onpointermove=e=>{if(drag){cx=drag[2]-(e.clientX-drag[0])/(base*zoom*.805);cy=drag[3]+(e.clientY-drag[1])/(base*zoom);draw()}};canvas.onpointerup=()=>drag=null;
 canvas.onwheel=e=>{e.preventDefault();zoom=Math.max(.5,Math.min(30,zoom*Math.exp(-e.deltaY*.001)));draw()};window.onresize=resize;
-async function getParts(stem,n){let s='';for(let i=1;i<=n;i++){let r=await fetch(stem+'_part'+i+'.txt?v=20261116c',{cache:'no-cache'});if(!r.ok)throw Error('데이터 파일 없음: '+stem+'_part'+i);s+=await r.text()}return JSON.parse(s)}
-async function load(){try{X=await fetch('yuseong_extra.json?v=20261116c',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('데이터 파일 없음: yuseong_extra.json');return r.json()});
+async function getParts(stem,n){let s='';for(let i=1;i<=n;i++){let r=await fetch(stem+'_part'+i+'.txt?v=20261116d',{cache:'no-cache'});if(!r.ok)throw Error('데이터 파일 없음: '+stem+'_part'+i);s+=await r.text()}return JSON.parse(s)}
+async function load(){try{X=await fetch('yuseong_extra.json?v=20261116d',{cache:'no-cache'}).then(r=>{if(!r.ok)throw Error('데이터 파일 없음: yuseong_extra.json');return r.json()});
 D={subway:[],slow:[],hubs:[],newstops:[],shuttle:[],express:[],meta:{focus_routes:X.focus_routes}};panel();terms();resize();
 $('status').textContent='결과 숫자 표시 완료. 지도와 사람 이동 자료 불러오는 중…';
 const d=await getParts('yuseong_sim_data',7);people=d.people;routes=d.routes.map(routeInfo);D=d;terms();draw();
